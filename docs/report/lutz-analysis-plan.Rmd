@@ -1,0 +1,22 @@
+---
+title: "Reproduction Analysis Plan"
+author: "Alana Lutz"
+date: "2023-10-05"
+output: pdf_document
+---
+
+# Planned revisions to reproduction of Malcomb et al. 2014
+
+Author: Alana Lutz
+
+## Analysis
+
+1) Modify the final vulnerability raster calculation from an additive aggregation to a geometric aggregation.
+2) Modify code to visualize maps with tmap instead of ggplot2.
+This change will improve the aesthetics and interpretability of the maps for better communication of results.
+
+## Results
+
+
+
+## Discussion
