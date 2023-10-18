@@ -1263,19 +1263,25 @@ vulnerability_r <- (40 - capacity_r) + sensitivity_r + drought_r + flood_r
 names(vulnerability_r) <- "vulnerability"
 plot(vulnerability_r)
 ```
+
+To modify this analysis, I will also calculate an aggregated vulnerability score using a geometric aggregation rather than an additive aggregation.
+
+$$
+Vulnerability = sqrt((40 - Adaptive Capacity) * Livelihood Sensitivity * Drought Exposure * Flood Risk)
+$$
+
 ```{r combined-vulnerability-geometric}
-# modify data
+# modify data to remove 0 values
 capacity_g <- capacity_r + 1
 sensitivity_g <- sensitivity_r + 1
 drought_g <- drought_r + 1
 flood_g <- flood_r + 1
 # final output (adding component rasters)
+# log transforming the data makes the map easier to interpret
 vulnerability_g <- log(sqrt((40 - capacity_g) * sensitivity_g * drought_g * flood_g) - 1)
-# 100 = highest vulnerability, 0 = lowest vulnerability
 names(vulnerability_g) <- "vulnerability"
 plot(vulnerability_g)
 ```
-
 
 ```{r find break & limit values for vulnerability maps}
 vuln_max <- max(vulnerability_r[[1]],na.rm = TRUE)
@@ -1309,13 +1315,15 @@ vuln_map = ggplot() +
 
 vuln_map
 ```
+
+
+
 ```{r vulnerability-tmap}
 tmap_mode('plot')
 tm_shape(vulnerability_r) +
-  tm_raster(style="cont") +
-tm_layout(legend.outside = TRUE) +
-  tm_layout(main.title = "Malawi Vulnerability to Climate Change: Additive",
-            main.title.size = 1)
+  tm_raster(palette = c("#FFFF75", "#CF4611"), style="pretty", breaks = c(vuln_min, vuln_max),
+            labels = c("Lower Vulnerability", "", "", "", "", "Higher Vulnerability"), title = "", legend.hist=TRUE) +
+  tm_layout(legend.outside = TRUE, main.title = "Malawi Vulnerability to Climate Change: Additive", main.title.size = 1)
 
 ```
 

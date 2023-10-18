@@ -12,11 +12,14 @@ Author: Alana Lutz
 ## Analysis
 
 1) Modify the final vulnerability raster calculation from an additive aggregation to a geometric aggregation.
+Additive aggregations assume that there is no interaction between indicators, which is often not the case with social vulnerability variables.
+Additive aggregations may also increase compensability, in which a low value in one indicator can mask a high value in another.
+Geometric aggregation can reduce issues with interaction and compensability.
 2) Modify code to visualize maps with tmap instead of ggplot2.
-This change will improve the aesthetics and interpretability of the maps for better communication of results.
+This change will improve the aesthetics and clarity of the maps for better communication of results.
 
 ## Results
 
-
+I will 
 
 ## Discussion
