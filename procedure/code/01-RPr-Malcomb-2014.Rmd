@@ -14,7 +14,7 @@ knit: (function(inputFile, encoding) {
 
 Malcomb, Weaver and Krakowka ([2014](https://doi.org/10.1016/j.apgeog.2014.01.004)) published one of the first sub-national geographic climate change vulnerability models for a developing country (1.4).
 The authors intended for the study to be replicable across space (other African countries with similar data available) (7.1), time (when new survey data is published) (4.5 and 7.1), and vulnerability stimuli (7.1).
-The study's social impacts are to address extreme vulnerability to climate change (1.3) and assisting in the allocation and evaluation of foreign aid (1.2).
+The study's social impacts are to address extreme vulnerability to climate change (1.3) and assist in the allocation and evaluation of foreign aid (1.2).
 The methodology was designed to be "transparent and easily replicable" (2.1) in its use of "locally derived indicators and granular data" (2.1).
 The study was designed to address critiques of vulnerability models aimed at their uncertainty and sensitivity due to problems of scale and spatial aggregation, normative and subjective modelling decisions, and data availability, and challenges in model comparability (2.1).
 The model uses household adaptive capacity data from the United States Agency for International Development (USAID) Demographic and Health Surveys (DHS) (1.4 and 4.1) available in 44 African countries (7.1), livelihood sensitivity data from the USAID / Famine Early Warning Systems Network (FEWSnet) livelihood zones baseline surveys available in 23 African countries (3.6), and global physical exposure data from the United Nations Environment Programme (UNEP) Global Risk Data Platform.
@@ -60,7 +60,7 @@ The working hypotheses are therefore:
 
 > H1: There is no perfect positive correlation between Malcomb et al's ranking of traditional authorities by household resilience and our reproduction study's ranking of traditional authorities by household resilience.
 
-> H2: There is no perfect positive correlation between Malcom et al's ranking of locations by climate vulnerability and our reproduction study's ranking of locations by climate vulnerability.
+> H2: There is no perfect positive correlation between Malcomb et al's ranking of locations by climate vulnerability and our reproduction study's ranking of locations by climate vulnerability.
 
 We will evaluate each of these hypotheses using a Spearman's Rho Correlation.
 A failure to reject these hypotheses would indicate that our results do not exactly match those of the original authors.
@@ -709,23 +709,23 @@ A complete list of required R packages is not known at the time of preregistrati
 The study will attempt to reproduce the original methods exactly, but some differences may be inevitable due to ambiguous or conflicting information in the original article.
 We will plan to make the following reasonable decisions, which may differ from the authors' intentions: 1.
 Figure 4 represents adaptive capacity, composed of assets and access.
-1.
+2.
 Adaptive capacity scores will be calculated for each household, and then household scores will be spatially joined by traditional authority and averaged.
-1.
+3.
 Figure 5 represents vulnerability, composed of adaptive capacity, livelihood sensitivity, and physical exposure.
-1.
+4.
 Every indicator will be rescaled to a 0 to 4 scale using the formula: `percent rank * 4`.
 This method is a compromise from the uncertainty caused by a 0 to 5 scale, quintiles, and nominal indicators.
-1.
+5.
 High ranks (4) will be assigned to better and safer conditions for each indicator.
-1.
+6.
 Weighted aggregation will be formulated so that the aggregate scores have a theoretical minimum of 0 and maximum of the assigned percentage for the thematic concept.
-- Assets = ([land] \* 0.06 + [livestock units] \* 0.04 + [wealth] \* 0.04 + [number sick] \* 0.03 + [orphans] \* 0.03) \* 25 - Access = ([water] \* 0.04 + [cell phone] \* 0.04 + [radio] \* 0.03 + [electricity] \* 0.03 + [cooking fuel] \* 0.02 + [urban/rural] \* 0.02 + [female household] \* 0.02) \* 25 - Livelihood sensitivity = ([subsistence food] \* 0.06 + [wage income] \* 0.06 + [cash crop income] \* 0.04 + [disaster coping] \* 0.04) \* 25 - Physical exposure = ([flood risk] \* 0.2 + [drought exposure] \* 0.2) \* 50 1.
+- Assets = ([land] \* 0.06 + [livestock units] \* 0.04 + [wealth] \* 0.04 + [number sick] \* 0.03 + [orphans] \* 0.03) \* 25 - Access = ([water] \* 0.04 + [cell phone] \* 0.04 + [radio] \* 0.03 + [electricity] \* 0.03 + [cooking fuel] \* 0.02 + [urban/rural] \* 0.02 + [female household] \* 0.02) \* 25 - Livelihood sensitivity = ([subsistence food] \* 0.06 + [wage income] \* 0.06 + [cash crop income] \* 0.04 + [disaster coping] \* 0.04) \* 25 - Physical exposure = ([flood risk] \* 0.2 + [drought exposure] \* 0.2) \* 50 7.
 Each thematic indicator will be rasterized or resampled to the UNEP/GRID data input most closely resembling the spatial resolution of figure 5.
-1.
+8.
 Vulnerability will be calculated so that the aggregate scores have a theoretical minimum of 0 and maximum of 100.
 This is achieved by inverting physical exposure.
-- Vulnerability = Assets + Access + Livelihood sensitivity + (40 - Physical Exposure) 1.
+- Vulnerability = Assets + Access + Livelihood sensitivity + (40 - Physical Exposure) 9.
 Any traditional authority missing adaptive capacity data from DHS surveys will be removed / masked from the final vulnerability analysis.
 
 ## Adaptive Capacity
@@ -1256,11 +1256,11 @@ plot(vulnerability_r)
 ```
 
 To modify this analysis, I will also calculate an aggregated vulnerability score using a geometric aggregation rather than an additive aggregation.
-I add a small value (1) to each indicator to remove 0 values, then multiply the indicators together, subtract 1, and take the square root.
-Finally, I log transform the data for ease of visualization and comparison.
+I added a small value (1) to each indicator to remove 0 values, then multiplied the indicators together, subtracted 1, and calculated the square root.
+Finally, I log transformed the data for ease of visualization and comparison.
 
 $$
-Vulnerability = sqrt((40 - Adaptive Capacity) * Livelihood Sensitivity * Drought Exposure * Flood Risk)
+Vulnerability = log(sqrt((40 - Adaptive Capacity) * Livelihood Sensitivity * Drought Exposure * Flood Risk))
 $$
 
 ```{r combined-vulnerability-geometric}
@@ -1286,6 +1286,8 @@ vuln_g_min <- min(vulnerability_g[[1]],na.rm = TRUE)
 
 ### Reproduction figure 5
 
+Reproduce figure 5 using the additive aggregation method from the original paper.
+
 ```{r vulnerability-tmap}
 tmap_mode('plot')
 tm_shape(vulnerability_r) +
@@ -1295,6 +1297,9 @@ tm_shape(vulnerability_r) +
   tm_grid(labels.col="gray", lines=FALSE)
 
 ```
+
+\
+Reproduce figure 5 using the geometric aggregation method, a deviation from the original paper for the purpose of reanalysis.
 
 ```{r vulnerability-geometric-tmap}
 tmap_mode('plot')
@@ -1441,7 +1446,37 @@ write_stars(vulnerability_r, here(public_d, "fig5rp.tif"), layer = "rpv")
 
 # Discussion
 
+The intent of the original study published by Malcomb et al. was to maximize replicability across space, time, and vulnerability stimuli, addressing critiques of the uncertainty and sensitivity of vulnerability models.
+However, despite the authors' intentions to publish a fully reproducible study, implementing an actual reproduction in practice raises a host of challenges that highlight more general problems with reproducibility in the field of spatial analysis.
+This reproduction attempt ultimately failed to produce identical or even similar results to the original study, as a result of a number of causes.
+
+For example, it was necessary to make many assumptions about calculating the individual components of adaptive capacity indicators from household survey data.
+The original study was unclear about the process for converting data (especially binary data) to a 5-point quintile scale, and the reproduction instead scaled each indicator from 0 to 4 using percent rank.
+Before even examining vulnerability data, there were digitization errors involving lakes, conservation areas, and the treatment of geometry errors and missing data that needed to be resolved before the map of populated Traditional Authorities could be considered accurate.
+In addition, in order to compare the results of the reproduction to that of the original study, the figures from the original study needed to be digitized using only the image from the pdf.
+This process seems unnecessarily complicated and could have been eliminated by publishing the figures in an editable format, or at least by clarifying the exact methods used to produce those figures.
+Beyond the technical and computational aspects of reproduction, the communication of the original study hindered overall transparency and clarity by blackboxing their stakeholder interview process and failing to provide consistent definitions of "vulnerability," "resilience," or "adaptive capacity."
+
+When taking all of these reproduction challenges into consideration, it is not surprising that there were major differences between the original and reproduced adaptive capacity results (Figure 4) across Malawi, as evidenced by the confusion matrix.
+There were also major differences between the original and reproduced vulnerability results (Figure 5).
+In particular, the reproduction indicated much lower vulnerability scores in central Malawi.
+Overall, this reproduction can be considered a failure, if success is measured by the ability to produce identical or very similar results to the original study.
+
+To add further value to this reproduction, I modified the final raster aggregation methodology to test the effect of a geometric aggregation against the original additive aggregation.
+The justification for this reanalysis is that additive aggregations assume that there is no interaction between indicators, which is often not the case with social vulnerability variables.
+Additive aggregations may also increase compensability, in which a low value in one indicator can mask a high value in another.
+Geometric aggregation can reduce issues with both interaction and compensability.
+
+When comparing vulnerability results between the additive and geometric aggregation methods, the geometric aggregation appears to identify more areas of Malawi with relatively greater vulnerability.
+This result suggests that compensability may be involved in the additive aggregation, giving some areas an artificially low vulnerability score.
+In the context of evaluating and allocating foreign aid, it is better to overestimate vulnerability than to underestimate.
+Thus, I would argue that a geometric aggregation strategy is likely the better approach in this study.
+
 # Conclusions
+
+This attempt at reproducing the climate vulnerability analysis in Malcomb et al. ultimately failed to produce identical or even similar results to the original study, despite the original study's intentions of reproducibility.
+This failure can be largely attributed to uncertainties in the data processing methodology, particularly the treatment of geometry errors and the scaling of indicators.
+These results emphasize the necessity of improving the reproducibility and replicability of climate vulnerability research, which is essential to enhance the potential for this research to inform policy and reduce harm caused by climate change.
 
 # Integrity Statement
 
