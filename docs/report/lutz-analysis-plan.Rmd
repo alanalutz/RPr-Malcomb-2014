@@ -20,6 +20,9 @@ This change will improve the aesthetics and clarity of the maps for better commu
 
 ## Results
 
-I will 
+I will reproduce Fig. 5 using the geometric aggregation formula and compare the resulting map to the version of Fig. 5 produced using the additive aggregation formula.
 
 ## Discussion
+
+If the vulnerability map produced by a geometric aggregation is notably different from the map produced by an additive aggregation, it will mean that this social vulnerability analysis is sensitive to the specific method of mathematical aggregation.
+Specifically, this result would suggest that there may be significant interaction between vulnerability indicators or compensability in the additive aggregation that should be accounted for.

@@ -1232,6 +1232,13 @@ ggplot() +
   scale_y_continuous(breaks=seq(-17,-10,1)) +
   scale_x_continuous(breaks=seq(33,36,1))
 
+tmap_mode('plot')
+tm_shape(vulnerability_g) +
+  tm_polygons(palette = c("#FFFF75", "#CF4611"), style="pretty", breaks = c(vuln_g_min, vuln_g_max),
+            labels = c("Lower Vulnerability", "", "", "", "Higher Vulnerability"), title = "", legend.hist=TRUE) +
+  tm_layout(legend.outside = TRUE, main.title = "Malawi Vulnerability to Climate Change:\nGeometric Aggregation (Log Transformed)", main.title.size = 1, frame=FALSE) +
+  tm_grid(labels.col="gray", lines=FALSE)
+
 lhz_v %>% 
   st_drop_geometry %>% 
   select(sensitivity) %>% 
@@ -1293,63 +1300,26 @@ vuln_g_min <- min(vulnerability_g[[1]],na.rm = TRUE)
 
 ### Reproduction figure 5
 
-```{r vulnerability-map}
-vuln_map = ggplot() +
-  geom_stars(data = vulnerability_r) +
-  scale_fill_gradient(
-    low = "#FFFF75",
-    high = "#CF4611",
-    breaks = c(vuln_min, vuln_max),
-    labels = c("Lower Vulnerability", "Higher Vulnerability"),
-    na.value = "transparent",
-    guide = "colourbar",
-    limits = c(vuln_min, vuln_max)
-  ) +
-  labs(title = "Malawi Vulnerability to Climate Change: Additive Aggregation") +
-  theme_minimal() +
-  theme(
-    legend.title = element_blank(),
-    axis.title.x = element_blank(),
-    axis.title.y = element_blank()
-  ) +   coord_quickmap()
-
-vuln_map
-```
-
-
-
 ```{r vulnerability-tmap}
 tmap_mode('plot')
 tm_shape(vulnerability_r) +
   tm_raster(palette = c("#FFFF75", "#CF4611"), style="pretty", breaks = c(vuln_min, vuln_max),
             labels = c("Lower Vulnerability", "", "", "", "", "Higher Vulnerability"), title = "", legend.hist=TRUE) +
-  tm_layout(legend.outside = TRUE, main.title = "Malawi Vulnerability to Climate Change: Additive", main.title.size = 1)
+  tm_layout(legend.outside = TRUE, main.title = "Malawi Vulnerability to Climate Change:\nAdditive Aggregation", main.title.size = 1, frame=FALSE) +
+  tm_grid(labels.col="gray", lines=FALSE)
 
 ```
 
+```{r vulnerability-geometric-tmap}
+tmap_mode('plot')
+tm_shape(vulnerability_g) +
+  tm_raster(palette = c("#FFFF75", "#CF4611"), style="pretty", breaks = c(vuln_g_min, vuln_g_max),
+            labels = c("Lower Vulnerability", "", "", "", "Higher Vulnerability"), title = "", legend.hist=TRUE) +
+  tm_layout(legend.outside = TRUE, main.title = "Malawi Vulnerability to Climate Change:\nGeometric Aggregation (Log Transformed)", main.title.size = 1, frame=FALSE) +
+  tm_grid(labels.col="gray", lines=FALSE)
 
-```{r vulnerability-map-geometric}
-vuln_map = ggplot() +
-  geom_stars(data = vulnerability_g) +
-  scale_fill_gradient(
-    low = "#FFFF75",
-    high = "#CF4611",
-    breaks = c(vuln_g_min, vuln_g_max),
-    labels = c("Lower Vulnerability", "Higher Vulnerability"),
-    na.value = "transparent",
-    guide = "colourbar",
-    limits = c(vuln_g_min, vuln_g_max)
-  ) +
-  labs(title = "Malawi Vulnerability to Climate Change: Geometric Aggregation") +
-  theme_minimal() +
-  theme(
-    legend.title = element_blank(),
-    axis.title.x = element_blank(),
-    axis.title.y = element_blank()
-  ) +   coord_quickmap()
-
-vuln_map
 ```
+
 
 
 ```{r saving spatial data outputs}
@@ -1419,6 +1389,18 @@ vulnerability_r$diffv <- vulnerability_r$rpv - vulnerability_r$orv
 # calculate difference between the original and reproduction,
 # for purposes of mapping
 
+rpvmin_g <- min(vulnerability_g$vulnerability, na.rm= TRUE)
+rpvmax_g <- max(vulnerability_g$vulnerability, na.rm= TRUE)
+vulnerability_g = vulnerability_g %>% 
+  mutate(rpv = (vulnerability - rpvmin_g) / (rpvmax_g - rpvmin_g) * 100)
+ # rpv is Re-scaled from 0 to 100 with (value - min)/(max - min)
+rm(rpvmin_g, rpvmax_g)
+
+vulnerability_g$diffv <- vulnerability_g$rpv - vulnerability_r$rpv
+# calculate difference between additive and geometric aggregations
+
+
+
 vulnerability_p <- st_as_sf(vulnerability_r)
 # convert raster to vector points to simplify plotting and correlation testing
 
@@ -1448,30 +1430,22 @@ Map differences in Figure 5
 range <- ceiling(max(abs(max(vulnerability_r$diffv, na.rm = TRUE)),
              abs(min(vulnerability_r$diffv, na.rm = TRUE))))
 
-# map can be improved by:
-# switch colors to a Colorbrewer divergent scale
-# use grey for lat / long labels
-# switch to using tmap package
-vuln_diff_map = ggplot() +
-  geom_stars(data = vulnerability_r["diffv"]) +
-  scale_fill_gradient2(
-    low = "#e9a3c9",
-    high = "#beaed4",
-    breaks = c(-range,0,range),
-    labels = c(paste0("-",range), "0", paste0(range)),
-    na.value = "transparent",
-    guide = "colourbar",
-    limits = c(-range,range),
-    name = "Vulnerability:\nReproduction -\nOriginal"#you want centered around zero, so make larger # the ends
-  ) +
-  coord_quickmap() +  
-  theme_minimal() +
-  theme(
-    axis.title.x = element_blank(),
-    axis.title.y = element_blank()
-  )
+tmap_mode('plot')
+tm_shape(vulnerability_r) +
+  tm_raster(col = "diffv", palette = "PiYG", style = "cont", breaks = c(-range,0,range), title = "") +
+  tm_layout(legend.outside = TRUE, main.title = "Vulnerability: Reproduction - Original", main.title.size = 1, frame=FALSE) +
+  tm_grid(labels.col="gray", lines=FALSE)
+```
+```{r vulnerability-difference-map2}
+# find range of values for divergent color scheme
+range <- ceiling(max(abs(max(vulnerability_g$diffv, na.rm = TRUE)),
+             abs(min(vulnerability_g$diffv, na.rm = TRUE))))
 
-vuln_diff_map
+tmap_mode('plot')
+tm_shape(vulnerability_g) +
+  tm_raster(col = "diffv", palette = "PiYG", style = "cont", breaks = c(-range,0,range), title = "") +
+  tm_layout(legend.outside = TRUE, main.title = "Vulnerability: Geometric - Additive", main.title.size = 1, frame=FALSE) +
+  tm_grid(labels.col="gray", lines=FALSE)
 ```
 
 
