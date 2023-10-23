@@ -15,12 +15,13 @@ Author: Alana Lutz
 Additive aggregations assume that there is no interaction between indicators, which is often not the case with social vulnerability variables.
 Additive aggregations may also increase compensability, in which a low value in one indicator can mask a high value in another.
 Geometric aggregation can reduce issues with interaction and compensability.
-2) Modify code to visualize maps with tmap instead of ggplot2.
+2) Modify code to visualize all maps with tmap instead of ggplot2.
 This change will improve the aesthetics and clarity of the maps for better communication of results.
 
 ## Results
 
 I will reproduce Fig. 5 using the geometric aggregation formula and compare the resulting map to the version of Fig. 5 produced using the additive aggregation formula.
+I will also produce a map that subtracts the additive aggregation raster from the geometric aggregation raster for ease of comparison.
 
 ## Discussion
 

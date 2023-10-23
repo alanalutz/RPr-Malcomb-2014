@@ -1216,27 +1216,11 @@ lhz_v <- lhz_v %>%
 # high sensitivity scores indicate high sensitivity
 # making capacity rasters 
 
-# why not change this to tmap from ggplot2!
-ggplot() + 
-  geom_sf(
-    data = lhz_v, 
-    aes(fill = sensitivity), 
-    size = .2, 
-    color = "grey98"
-  ) +
-  scale_fill_continuous(
-    name = "Livelihood\nSensitivity\nScores", 
-    low="lemonchiffon1", 
-    high="lightcoral"
-  ) +
-  scale_y_continuous(breaks=seq(-17,-10,1)) +
-  scale_x_continuous(breaks=seq(33,36,1))
-
+# changed from tmap to ggplot2
 tmap_mode('plot')
-tm_shape(vulnerability_g) +
-  tm_polygons(palette = c("#FFFF75", "#CF4611"), style="pretty", breaks = c(vuln_g_min, vuln_g_max),
-            labels = c("Lower Vulnerability", "", "", "", "Higher Vulnerability"), title = "", legend.hist=TRUE) +
-  tm_layout(legend.outside = TRUE, main.title = "Malawi Vulnerability to Climate Change:\nGeometric Aggregation (Log Transformed)", main.title.size = 1, frame=FALSE) +
+tm_shape(lhz_v) +
+  tm_polygons("sensitivity", palette = c("lemonchiffon1", "lightcoral"), style="cont", title = "Livelihood\nSensitivity\nScores", border.col="white") +
+  tm_layout(legend.outside = TRUE, frame=FALSE) +
   tm_grid(labels.col="gray", lines=FALSE)
 
 lhz_v %>% 
@@ -1272,6 +1256,8 @@ plot(vulnerability_r)
 ```
 
 To modify this analysis, I will also calculate an aggregated vulnerability score using a geometric aggregation rather than an additive aggregation.
+I add a small value (1) to each indicator to remove 0 values, then multiply the indicators together, subtract 1, and take the square root.
+Finally, I log transform the data for ease of visualization and comparison.
 
 $$
 Vulnerability = sqrt((40 - Adaptive Capacity) * Livelihood Sensitivity * Drought Exposure * Flood Risk)
@@ -1320,8 +1306,6 @@ tm_shape(vulnerability_g) +
 
 ```
 
-
-
 ```{r saving spatial data outputs}
 write_stars(capacity_r, here("data","derived","public","ta_capacity.tif"))
 
@@ -1331,8 +1315,6 @@ write_sf(ta_v, here(results), "ta")
 
 write_sf(lhz_v, here(results), "lhz")
 ```
-
-### Original study figure 5
 
 ### Evaluate vulnerability reproduction
 
@@ -1377,6 +1359,9 @@ rm(orvmin, orvmax)
 #### Compare vulnerability result
 
 ```{r compare-fig5, warning=FALSE, fig.width=4, fig.height=4}
+
+# calculate difference between the original and reproduction,
+# for purposes of mapping
 rpvmin <- min(vulnerability_r$vulnerability, na.rm= TRUE)
 rpvmax <- max(vulnerability_r$vulnerability, na.rm= TRUE)
 vulnerability_r = vulnerability_r %>% 
@@ -1386,9 +1371,9 @@ rm(rpvmin, rpvmax)
 
 vulnerability_r$orv <- orfig5rast$orv 
 vulnerability_r$diffv <- vulnerability_r$rpv - vulnerability_r$orv
-# calculate difference between the original and reproduction,
-# for purposes of mapping
 
+
+# calculate difference between additive and geometric aggregations
 rpvmin_g <- min(vulnerability_g$vulnerability, na.rm= TRUE)
 rpvmax_g <- max(vulnerability_g$vulnerability, na.rm= TRUE)
 vulnerability_g = vulnerability_g %>% 
@@ -1397,7 +1382,6 @@ vulnerability_g = vulnerability_g %>%
 rm(rpvmin_g, rpvmax_g)
 
 vulnerability_g$diffv <- vulnerability_g$rpv - vulnerability_r$rpv
-# calculate difference between additive and geometric aggregations
 
 
 
@@ -1432,10 +1416,11 @@ range <- ceiling(max(abs(max(vulnerability_r$diffv, na.rm = TRUE)),
 
 tmap_mode('plot')
 tm_shape(vulnerability_r) +
-  tm_raster(col = "diffv", palette = "PiYG", style = "cont", breaks = c(-range,0,range), title = "") +
-  tm_layout(legend.outside = TRUE, main.title = "Vulnerability: Reproduction - Original", main.title.size = 1, frame=FALSE) +
+  tm_raster(col = "diffv", palette = "PiYG", style = "cont", breaks = c(-range,0,range), title = "Vulnerability:\nReproduction - Original") +
+  tm_layout(legend.outside = TRUE, main.title.size = 1, frame=FALSE) +
   tm_grid(labels.col="gray", lines=FALSE)
 ```
+
 ```{r vulnerability-difference-map2}
 # find range of values for divergent color scheme
 range <- ceiling(max(abs(max(vulnerability_g$diffv, na.rm = TRUE)),
@@ -1443,11 +1428,10 @@ range <- ceiling(max(abs(max(vulnerability_g$diffv, na.rm = TRUE)),
 
 tmap_mode('plot')
 tm_shape(vulnerability_g) +
-  tm_raster(col = "diffv", palette = "PiYG", style = "cont", breaks = c(-range,0,range), title = "") +
-  tm_layout(legend.outside = TRUE, main.title = "Vulnerability: Geometric - Additive", main.title.size = 1, frame=FALSE) +
+  tm_raster(col = "diffv", palette = "PiYG", style = "cont", breaks = c(-range,0,range), title = "Vulnerability:\nGeometric - Additive") +
+  tm_layout(legend.outside = TRUE, main.title.size = 1, frame=FALSE) +
   tm_grid(labels.col="gray", lines=FALSE)
 ```
-
 
 ```{r save-fig5-comparison-data}
 write_stars(vulnerability_r, here(public_d, "fig5diff.tif"), layer = "diffv")
@@ -1474,7 +1458,7 @@ R. Krakowka.
 2014.
 Vulnerability modeling for sub-Saharan Africa: An operationalized approach in Malawi.
 *Applied Geography* 48:17--30.
-[DOI:[10.1016/j.apgeog.2014.01.004](DOI:%5B10.1016/j.apgeog.2014.01.004){.uri}](<https://doi.org/10.1016/j.apgeog.2014.01.004>).
+[DOI:[10.1016/j.apgeog.2014.01.004](DOI:%5B10.1016/j.apgeog.2014.01.004){.uri}](https://doi.org/10.1016/j.apgeog.2014.01.004).
 
 ### Sections
 
