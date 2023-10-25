@@ -17,6 +17,7 @@ Additive aggregations may also increase compensability, in which a low value in 
 Geometric aggregation can reduce issues with interaction and compensability.
 2) Modify code to visualize all maps with tmap instead of ggplot2.
 This change will improve the aesthetics and clarity of the maps for better communication of results.
+3) Write discussion and conclusions section of report.
 
 ## Results
 
